@@ -212,6 +212,4 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
     embed.set_footer(text=f"draft started by {membre.name}#{membre.discriminator}")
     await send_channel_ping.send(embed=embed)
 
-token = "OTY2NjA1Nzg5NzgxNDU0ODUw.GQtBD-.Jhr-1kCMvfaugMsgrmu7XBC9RS8qJWNbVlgPnE"
-
 bot.run(token)
