@@ -210,6 +210,30 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
 
     embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2}", color=0x33CAFF)
     embed.set_footer(text=f"draft started by {membre.name}#{membre.discriminator}")
-    await send_channel_ping.send(embed=embed)
+    
+    cpt_team_1 = 0
+    cpt_team_2 = 0
+
+    async def callback_team_1(interaction):
+        if interaction.user.id in liste:
+            pass
+    
+    async def callback_team_2(interaction):
+        if interaction.user.id in liste:
+            pass
+
+    button_team_1 = bt.Button(label="Join Draft", style=ButtonStyle.green)
+    button_team_1.callback = callback_team_1
+
+    button_team_2 = bt.Button(label="Leave Draft", style=ButtonStyle.danger)
+    button_team_2.callback = callback_team_2
+
+    view = bt.View()
+    view.add_item(button_team_1)
+    view.add_item(button_team_2)
+    
+    await send_channel_ping.send(view=view, embed=embed)
+    
+token = "OTY2NjA1Nzg5NzgxNDU0ODUw.GrBZFQ.CNdgsmIhHaC318repYjpAYx8gzJQSKZS85ZLzo"
 
 bot.run(token)
