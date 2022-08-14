@@ -234,6 +234,15 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
     
     await send_channel_ping.send(view=view, embed=embed)
     
-token = "OTY2NjA1Nzg5NzgxNDU0ODUw.GrBZFQ.CNdgsmIhHaC318repYjpAYx8gzJQSKZS85ZLzo"
 
-bot.run(token)
+import sys
+
+try:
+    sys.path.append("/python/token")
+    import token_bot
+except:
+    sys.path.append("/home/cleeem/python/token")
+    import token_bot
+token_run = token_bot.tokens["token_bot_draft"]
+
+bot.run(token_run)
