@@ -88,21 +88,54 @@ async def create_role_channel(ctx, role_ping:Role, cate, channel_draft, channel_
     server : Guild = ctx.guild
     
     embed = Embed(title="Role Draft", description=f"To get {role_ping.mention}, react with the reaction below")
-    message_react : channel = await channel_role.send(embed=embed)
-    await message_react.add_reaction("⚫")
+    mes = await channel_role.send(embed=embed)
+    await mes.pin()
+    # async def callback_role(interaction):
+    #     await interaction.user.add_roles(role_ping)
 
-    def checkEmoji(reaction, user):
-        return message_react.id == reaction.message.id and (str(reaction.emoji) == "⚫")
+    # async def callback_suppr(interaction):
+    #     try:
+    #         await interaction.user.remove_roles(role_ping)
+    #     except:
+    #         pass 
 
-    a=True
+    # button_role = bt.Button(label="Draft Role", style=ButtonStyle.primary)
+    # button_role.callback = callback_role
 
-    while a:
-        reaction, user = await bot.wait_for("reaction_add", timeout = 9999, check = checkEmoji)
+    # button_role_suppr = bt.Button(label="Draft Role", style=ButtonStyle.red)
+    # button_role_suppr.callback = callback_suppr
 
-        if reaction.emoji == "⚫":
+    # view = bt.View()
+    # view.add_item(button_role)
+    # view.add_item(button_role_suppr)
 
-            await user.add_roles(role_ping)  
+    # message_react : channel = await channel_role.send(view=view, embed=embed)
 
+@bot.command()
+async def get_role(ctx):
+    fichier = reader(open(f"data/{ctx.guild.id}.csv"))
+    for ligne in fichier:
+        role_ping = ligne[0].replace("[","").replace("'","")
+    
+    for role in ctx.guild.roles:
+        if str(role.id) == str(role_ping):
+            role_ping = role
+            break
+    
+    present = False
+
+    for role in ctx.author.roles:
+        if role.id == role_ping.id:
+            present=True
+            break
+
+    if present:
+        await ctx.author.remove_roles(role_ping)
+    else:
+        await ctx.author.add_roles(role_ping)
+        
+    await ctx.message.delete()
+    
 
 @bot.command()
 async def draft(ctx, nb_player=8):
@@ -111,6 +144,7 @@ async def draft(ctx, nb_player=8):
         nb_player=8
 
     fichier = reader(open(f"data/{ctx.guild.id}.csv"))
+    
     
     role_ping = None
     channel_ping = None
@@ -133,7 +167,13 @@ async def draft(ctx, nb_player=8):
 
 
     async def callback_join(interaction):
-        if not interaction.user.id in liste:
+        has_role=False
+        for role in interaction.user.roles:
+            if str(role.id) == str(role_ping):
+                has_role=True
+                break
+
+        if (interaction.user.id not in liste) and has_role:
             liste.append(interaction.user.id)
             
             res = f"Players {len(liste)}/{nb_player} :\n"
@@ -196,6 +236,7 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
     
     team_1 = ""
     team_2 = ""
+    
 
     for i,joueur in enumerate(liste):
         player = bot.get_user(joueur)
@@ -204,35 +245,46 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
         else:
             team_2 = f"{player.mention}\n{team_2}"
 
+
     embed = Embed(title="Draft", description=res, color=0x33CAFF)
     await message_start.edit(embed = embed)
     await message_start.clear_reactions()
 
-    embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2}", color=0x33CAFF)
+    embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
     embed.set_footer(text=f"draft started by {membre.name}#{membre.discriminator}")
     
-    cpt_team_1 = 0
-    cpt_team_2 = 0
+    liste_score =  [0, 0]
+
+    liste_vote = []
 
     async def callback_team_1(interaction):
         if interaction.user.id in liste:
-            pass
+            if not interaction.user.id in liste_vote:
+                liste_vote.append(interaction.user.id)
+                liste_score[0] += 1
+                embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score, team 1 {liste_score[0]} | team 2 {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
+
+                await message_fin.edit(embed=embed)
     
     async def callback_team_2(interaction):
         if interaction.user.id in liste:
-            pass
+            if not interaction.user.id in liste_vote:
+                liste_vote.append(interaction.user.id)
+                liste_score[1] += 1
+                embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score, team 1 {liste_score[0]} | team 2 {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
 
-    button_team_1 = bt.Button(label="Join Draft", style=ButtonStyle.green)
+                await message_fin.edit(embed=embed)
+    button_team_1 = bt.Button(label="Team 1", style=ButtonStyle.primary)
     button_team_1.callback = callback_team_1
 
-    button_team_2 = bt.Button(label="Leave Draft", style=ButtonStyle.danger)
+    button_team_2 = bt.Button(label="Team 2", style=ButtonStyle.primary)
     button_team_2.callback = callback_team_2
 
     view = bt.View()
     view.add_item(button_team_1)
     view.add_item(button_team_2)
     
-    await send_channel_ping.send(view=view, embed=embed)
+    message_fin = await send_channel_ping.send(view=view, embed=embed)
     
 
 import sys
@@ -243,6 +295,7 @@ try:
 except:
     sys.path.append("/home/cleeem/python/token")
     import token_bot
+    
 token_run = token_bot.tokens["token_bot_draft"]
 
 bot.run(token_run)
