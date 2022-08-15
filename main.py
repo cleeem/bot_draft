@@ -90,27 +90,8 @@ async def create_role_channel(ctx, role_ping:Role, cate, channel_draft, channel_
     embed = Embed(title="Role Draft", description=f"To get {role_ping.mention}, react with the reaction below")
     mes = await channel_role.send(embed=embed)
     await mes.pin()
-    # async def callback_role(interaction):
-    #     await interaction.user.add_roles(role_ping)
-
-    # async def callback_suppr(interaction):
-    #     try:
-    #         await interaction.user.remove_roles(role_ping)
-    #     except:
-    #         pass 
-
-    # button_role = bt.Button(label="Draft Role", style=ButtonStyle.primary)
-    # button_role.callback = callback_role
-
-    # button_role_suppr = bt.Button(label="Draft Role", style=ButtonStyle.red)
-    # button_role_suppr.callback = callback_suppr
-
-    # view = bt.View()
-    # view.add_item(button_role)
-    # view.add_item(button_role_suppr)
-
-    # message_react : channel = await channel_role.send(view=view, embed=embed)
-
+   
+   
 @bot.command()
 async def get_role(ctx):
     fichier = reader(open(f"data/{ctx.guild.id}.csv"))
