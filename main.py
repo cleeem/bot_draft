@@ -136,6 +136,11 @@ async def draft(ctx, nb_player=8):
 
     send_channel_ping = bot.get_channel(int(channel_ping))
 
+    messages = await send_channel_ping.history(limit=50).flatten()
+    
+    for message in messages:
+        await message.delete()
+
     membre : Member = ctx.author
 
     await send_channel_ping.send(f"<@&{role_ping}> a draft is starting... \nPlease react to the message bellow with ✅ to enter and with ⭕ to leave")
@@ -243,8 +248,7 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
             if not interaction.user.id in liste_vote:
                 liste_vote.append(interaction.user.id)
                 liste_score[0] += 1
-                embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score, team 1 {liste_score[0]} | team 2 {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
-
+                embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score for team 1 : {liste_score[0]} \nCurrent score for team 2 : {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
                 await message_fin.edit(embed=embed)
     
     async def callback_team_2(interaction):
@@ -252,8 +256,7 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
             if not interaction.user.id in liste_vote:
                 liste_vote.append(interaction.user.id)
                 liste_score[1] += 1
-                embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score, team 1 {liste_score[0]} | team 2 {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
-
+                embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score for team 1 : {liste_score[0]} \nCurrent score for team 2 : {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
                 await message_fin.edit(embed=embed)
     button_team_1 = bt.Button(label="Team 1", style=ButtonStyle.primary)
     button_team_1.callback = callback_team_1
