@@ -1,11 +1,11 @@
 from genericpath import exists
 from random import shuffle
-from turtle import title
 from discord import *
 import discord.ui as bt
 from discord.ext import commands
 from csv import reader
 import os
+
 
 client = Client()
 
@@ -239,7 +239,8 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
     embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
     embed.set_footer(text=f"draft started by {membre.name}#{membre.discriminator}")
     
-    liste_score =  [0, 0]
+    global liste_score
+    liste_score : list =  [0, 0]
 
     liste_vote = []
 
@@ -250,7 +251,10 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
                 liste_score[0] += 1
                 embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score for team 1 : {liste_score[0]} \nCurrent score for team 2 : {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
                 await message_fin.edit(embed=embed)
-    
+
+                if (liste_score[0] + liste_score[1]) == 8:
+                    await calcul(ctx=ctx)
+
     async def callback_team_2(interaction):
         if interaction.user.id in liste:
             if not interaction.user.id in liste_vote:
@@ -258,6 +262,10 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
                 liste_score[1] += 1
                 embed = Embed(title="Draft", description=f"{team_1}🆚\n{team_2} \n\nScore reported : {len(liste_vote)}/{nb_player}\nCurrent score for team 1 : {liste_score[0]} \nCurrent score for team 2 : {liste_score[1]} \n\nPlease report the score using buttons below (all players must react), if both teams have the same amount of vote it will count as a loose for both team", color=0x33CAFF)
                 await message_fin.edit(embed=embed)
+
+                if (liste_score[0] + liste_score[1]) == 8:
+                    await calcul(ctx=ctx)
+
     button_team_1 = bt.Button(label="Team 1", style=ButtonStyle.primary)
     button_team_1.callback = callback_team_1
 
@@ -270,6 +278,10 @@ async def message_all(ctx,message_start, send_channel_ping, membre, liste, nb_pl
     
     message_fin = await send_channel_ping.send(view=view, embed=embed)
     
+
+async def calcul(ctx):
+    score_1 = liste_score[0]
+
 
 import sys
 
